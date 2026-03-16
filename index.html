@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC 15分钟策略交易记录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #0f3460;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-card .label {
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .stat-card.win-rate .value {
+            color: #00ff88;
+        }
+
+        .stat-card.loss .value {
+            color: #ff4444;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #0f3460;
+            color: #fff;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #16213e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .trades-table th {
+            background: #0f3460;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .trades-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .trades-table tr:hover {
+            background: #1f2b4d;
+        }
+
+        .trades-table .success {
+            color: #00ff88;
+        }
+
+        .trades-table .fail {
+            color: #ff4444;
+        }
+
+        .trades-table .direction-long {
+            color: #00ff88;
+        }
+
+        .trades-table .direction-short {
+            color: #ff4444;
+        }
+
+        .trades-table .return-positive {
+            color: #00ff88;
+        }
+
+        .trades-table .return-negative {
+            color: #ff4444;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .page-btn:hover {
+            background: #00d4ff;
+        }
+
+        .page-info {
+            padding: 8px 16px;
+            color: #888;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BTC 15分钟策略交易记录</h1>
+        <p class="subtitle">策略参数: RSI(35,80) + MACD金叉死叉 + 阈值=2</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="value" id="totalTrades">-</div>
+                <div class="label">总交易次数</div>
+            </div>
+            <div class="stat-card win-rate">
+                <div class="value" id="winRate">-</div>
+                <div class="label">胜率</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="successTrades">-</div>
+                <div class="label">成功次数</div>
+            </div>
+            <div class="stat-card loss">
+                <div class="value" id="failedTrades">-</div>
+                <div class="label">失败次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="totalReturn">-</div>
+                <div class="label">总收益%</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="avgReturn">-</div>
+                <div class="label">平均收益%</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="success">成功</button>
+            <button class="filter-btn" data-filter="fail">失败</button>
+        </div>
+
+        <table class="trades-table">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>入场时间</th>
+                    <th>平仓时间</th>
+                    <th>方向</th>
+                    <th>入场价</th>
+                    <th>平仓价</th>
+                    <th>收益%</th>
+                    <th>结果</th>
+                </tr>
+            </thead>
+            <tbody id="tradesBody">
+                <tr><td colspan="8" class="loading">加载中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let allTrades = [];
+        let currentFilter = 'all';
+
+        // 加载数据
+        async function loadTrades() {
+            try {
+                const response = await fetch('results/trades_detail.json');
+                allTrades = await response.json();
+                renderTrades();
+                updateStats();
+            } catch (error) {
+                document.getElementById('tradesBody').innerHTML =
+                    '<tr><td colspan="8" class="loading">加载失败，请确保已运行分析脚本</td></tr>';
+            }
+        }
+
+        // 渲染交易列表
+        function renderTrades() {
+            const tbody = document.getElementById('tradesBody');
+
+            let filteredTrades = allTrades;
+            if (currentFilter === 'success') {
+                filteredTrades = allTrades.filter(t => t.success);
+            } else if (currentFilter === 'fail') {
+                filteredTrades = allTrades.filter(t => !t.success);
+            }
+
+            if (filteredTrades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">暂无数据</td></tr>';
+                return;
+            }
+
+            // 按时间倒序
+            filteredTrades = [...filteredTrades].sort((a, b) =>
+                new Date(b.entry_time) - new Date(a.entry_time));
+
+            tbody.innerHTML = filteredTrades.map(trade => `
+                <tr>
+                    <td>${trade.id}</td>
+                    <td>${trade.entry_time}</td>
+                    <td>${trade.exit_time}</td>
+                    <td class="direction-${trade.direction.toLowerCase()}">${trade.direction}</td>
+                    <td>${trade.entry_price.toLocaleString()}</td>
+                    <td>${trade.exit_price.toLocaleString()}</td>
+                    <td class="${trade.return_pct >= 0 ? 'return-positive' : 'return-negative'}">
+                        ${trade.return_pct >= 0 ? '+' : ''}${trade.return_pct.toFixed(2)}%
+                    </td>
+                    <td class="${trade.success ? 'success' : 'fail'}">
+                        ${trade.success ? '成功' : '失败'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 更新统计
+        function updateStats() {
+            const total = allTrades.length;
+            const success = allTrades.filter(t => t.success).length;
+            const failed = total - success;
+            const winRate = total > 0 ? (success / total * 100).toFixed(2) : 0;
+            const totalReturn = allTrades.reduce((sum, t) => sum + t.return_pct, 0);
+            const avgReturn = total > 0 ? (totalReturn / total).toFixed(2) : 0;
+
+            document.getElementById('totalTrades').textContent = total;
+            document.getElementById('winRate').textContent = winRate + '%';
+            document.getElementById('successTrades').textContent = success;
+            document.getElementById('failedTrades').textContent = failed;
+            document.getElementById('totalReturn').textContent = totalReturn.toFixed(2) + '%';
+            document.getElementById('avgReturn').textContent = avgReturn + '%';
+        }
+
+        // 筛选按钮
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderTrades();
+            });
+        });
+
+        // 初始化
+        loadTrades();
+    </script>
+</body>
+</html>
