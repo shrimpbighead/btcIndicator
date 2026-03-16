@@ -236,8 +236,15 @@
         // 加载数据
         async function loadTrades() {
             try {
-                const response = await fetch('results/trades_detail.json');
-                allTrades = await response.json();
+                // 优先加载完整数据
+                let response = await fetch('results/trades_15min_full.json');
+                if (response.ok) {
+                    allTrades = await response.json();
+                } else {
+                    // 备用
+                    response = await fetch('results/trades_detail.json');
+                    allTrades = await response.json();
+                }
                 renderTrades();
                 updateStats();
             } catch (error) {
