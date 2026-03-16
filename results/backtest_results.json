@@ -1,0 +1,11 @@
+{
+  "total_trades": 12,
+  "closed_trades": 6,
+  "win_rate": 0.0,
+  "profit_factor": 0.0,
+  "total_return": -0.01782655873321237,
+  "max_drawdown": 0.5085452403553896,
+  "sharpe_ratio": -6889.91598391363,
+  "avg_trade": -29.71093122202093,
+  "final_capital": 9821.734412667876
+}

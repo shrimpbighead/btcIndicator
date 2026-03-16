@@ -1,0 +1,42 @@
+# BTC GA Optimizer Configuration
+
+# 数据设置
+SYMBOL = "BTC/USDT"
+TIMEFRAME = "15m"
+DATA_LIMIT = 1000  # 每次获取的K线数量
+
+# 遗传算法设置
+POPULATION_SIZE = 50
+NUM_GENERATIONS = 40
+TOURNAMENT_SIZE = 3
+CROSSOVER_RATE = 0.7
+MUTATION_RATE = 0.15
+ELITE_COUNT = 3
+MIN_WIN_RATE_THRESHOLD = 0.55  # 最低胜率阈值
+
+# 回测设置
+TRAIN_TEST_SPLIT = 0.8
+LOOK_AHEAD_BARS = 4  # 信号验证的未来K线数
+
+# AI过滤器设置
+USE_AI_FILTER = True
+ML_MODEL = "random_forest"  # 或 "xgboost"
+ML_CONFIDENCE_THRESHOLD = 0.6
+
+# 指标参数池
+MA_PERIODS = [5, 7, 9, 12, 15, 20, 25, 30, 60, 120]
+EMA_PERIODS = [5, 7, 9, 12, 15, 20, 25, 30, 60]
+RSI_PERIODS = [6, 8, 10, 12, 14, 16]
+MACD_FAST = [6, 8, 12, 16]
+MACD_SLOW = [18, 24, 30]
+MACD_SIGNAL = [6, 9, 12]
+STOCH_K = [8, 10, 14, 20]
+STOCH_D = [3, 5, 7]
+CCI_PERIODS = [10, 14, 20]
+BB_PERIODS = [10, 14, 20, 30]
+BB_STD = [1.5, 2.0, 2.5, 3.0]
+ATR_PERIODS = [7, 10, 14, 20]
+
+# 手续费和滑点
+FEE_RATE = 0.001  # 0.1%
+SLIPPAGE = 0.0005  # 0.05%
